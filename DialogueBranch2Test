@@ -1,0 +1,88 @@
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using System.Collections.Generic;
+
+public class DialogueBranchController : MonoBehaviour
+{
+    // References to other objects/components
+    public DialogueController2 dialogueController;
+    public TextMeshProUGUI option1Text;
+    public TextMeshProUGUI option2Text;
+
+    // Dialogue options
+    private List<string> option1Lines = new List<string>();
+    private List<string> option2Lines = new List<string>();
+
+    // Whether we're currently displaying a branch or not
+    private bool isDisplayingBranch = false;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        // Initialize the option arrays with empty lists
+        option1Lines = new List<string>();
+        option2Lines = new List<string>();
+    }
+
+    // Call this method to start displaying a dialogue branch
+    public void DisplayBranch(List<string> option1Lines, List<string> option2Lines)
+    {
+        // Store the option lines
+        this.option1Lines = option1Lines;
+        this.option2Lines = option2Lines;
+
+        // Display the options
+        option1Text.text = string.Join("\n", option1Lines);
+        option2Text.text = string.Join("\n", option2Lines);
+
+        // Show the options and disable the main dialogue button
+        option1Text.gameObject.SetActive(true);
+        option2Text.gameObject.SetActive(true);
+        dialogueController.dialogueButton.gameObject.SetActive(false);
+
+        // Mark that we're displaying a branch
+        isDisplayingBranch = true;
+    }
+
+    // Call this method to end the current dialogue branch and resume normal dialogue
+    public void EndBranch()
+    {
+        // Hide the options and enable the main dialogue button
+        option1Text.gameObject.SetActive(false);
+        option2Text.gameObject.SetActive(false);
+        dialogueController.dialogueButton.gameObject.SetActive(true);
+
+        // Clear the option lines
+        option1Lines.Clear();
+        option2Lines.Clear();
+
+        // Mark that we're no longer displaying a branch
+        isDisplayingBranch = false;
+
+        // Start displaying the next line of dialogue
+        dialogueController.UpdateDialogue();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        // If we're currently displaying a branch, check for input to select an option
+        if (isDisplayingBranch && Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            // Display the first option
+            dialogueController.StartCoroutine(dialogueController.DisplayDialogueLine(option1Lines[0]));
+
+            // End the branch
+            EndBranch();
+        }
+        else if (isDisplayingBranch && Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            // Display the second option
+            dialogueController.StartCoroutine(dialogueController.DisplayDialogueLine(option2Lines[0]));
+
+            // End the branch
+            EndBranch();
+        }
+    }
+}
